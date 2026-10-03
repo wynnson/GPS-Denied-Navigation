@@ -124,31 +124,46 @@ lat_lon_reset_counter: 0
 
 ## Raspberry Pi (4B)
 
-#### ROS2 on Raspberry Pi:
+#### Configuring WiFi:
 ```bash
-chmod +x scripts/install_ros_deps.sh    # If missing permision
-sudo ./scripts/install_ros_deps.sh
+sudo nano /etc/netplan/50-cloud-init.yaml   # Edit WiFi YAML config
+sudo systemctl restart systemd-networkd     # Restart network service
+sudo netplan generate                       # Parse config
+sudo netplan apply                          # Try to connect
+ip addr show wlan0                          # Check IP connection
 ```
 
-#### Using ssh and cloning:
+#### SSH into the Pi:
 ```bash
 ssh drone@<IP-address>
+```
+
+#### Cloning:
+```bash
 git clone --filter=blob:none --no-checkout https://github.com/wynnson/GPS-Denied-Navigation.git
 cd GPS-Denied-Navigation
 
 # Only pull needed files (ignore using !/)
 git sparse-checkout init --no-cone
-git sparse-checkout set \
-  '/*' \ 
-  '!/notebook/' \
-  '!/visualization/' \
-  '!/data/GT_NW.tif'
-git checkout
+git sparse-checkout set --stdin <<'EOF'
+/*
+!/notebooks/
+!/visualization/
+!/data/GT_NW.tif
+EOF
 
+git checkout
 ```
 
-#### Installation
+#### ROS2 on Raspberry Pi:
 ```bash
+chmod +x scripts/install_rpi_deps.sh    # If missing permision
+./scripts/install_ros_deps.sh           # Installs needed deps and uv
+```
+
+#### Download Python Dependencies to Virtual Environment
+```bash
+export PATH="$HOME/.local/bin:$PATH"    # Set uv path
 uv sync --no-default-groups --group pi
 ```
 

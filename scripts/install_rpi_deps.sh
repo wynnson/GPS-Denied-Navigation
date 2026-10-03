@@ -1,29 +1,34 @@
 #!/usr/bin/env bash
 
 # NOTE:
-# Need perms: chmod +x scripts/install_ros_deps.sh
-# Run: sudo ./scripts/install_ros_deps.sh
+# Need perms:
+#   chmod +x scripts/install_ros_deps.sh
+#
+# Run:
+#   ./scripts/install_ros_deps.sh
 
 set -e
 
-apt update
+# ===== Ubuntu / ROS setup =====
 
-apt install -y \
+sudo apt update
+
+sudo apt install -y \
   curl \
   software-properties-common
 
-add-apt-repository -y universe
+sudo add-apt-repository -y universe
 
-curl -sSL \
+sudo curl -sSL \
   https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
   -o /usr/share/keyrings/ros-archive-keyring.gpg
 
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu resolute main" \
-  > /etc/apt/sources.list.d/ros2.list
+  | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
-apt update
+sudo apt update
 
-apt install -y \
+sudo apt install -y \
   ros-lyrical-ros-base \
   ros-lyrical-cv-bridge \
   ros-lyrical-sensor-msgs \
@@ -35,6 +40,16 @@ apt install -y \
   python3-rosdep \
   python3-vcstool
 
+# ===== uv installation =====
+
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-rm -rf /var/lib/apt/lists/*
+export PATH="$HOME/.local/bin:$PATH"
+
+if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.bashrc"; then
+  echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+fi
+
+# ===== cleanup =====
+
+sudo rm -rf /var/lib/apt/lists/*
