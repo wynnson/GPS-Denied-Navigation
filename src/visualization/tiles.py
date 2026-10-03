@@ -154,12 +154,12 @@ def show_predictions(
 
 def show_estimated_position(
     path: Path,
-    estimated_position: tuple[float, float], 
+    estimated_position: tuple[float, float, float], 
     predictions: list[tuple],
     score_epsilon: float,
     dst_crs: str = "EPSG:4326",
 ):
-    est_lon, est_lat = estimated_position
+    est_lon, est_lat, est_std = estimated_position
 
     with rasterio.open(path) as src:
         image = src.read(RGB)

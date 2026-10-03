@@ -47,7 +47,7 @@ class Localizer:
 
         return res
 
-    def estimate_position(self, predictions: list[tuple]) -> tuple[float, float]:
+    def estimate_position(self, predictions: list[tuple]) -> tuple[float, float, float]:
         """Based on the top k predictions, make a location estimate"""
         anchor = predictions[0][2]
         candidates = []
@@ -74,8 +74,18 @@ class Localizer:
             weighted_lon += weight * lon
             weighted_lat += weight * lat
 
-        return float(weighted_lon), float(weighted_lat)
+        center = weighted_lon, weighted_lat
 
+        dists = np.array([])
+        for score, coords in candidates:
+            dists.append(haversine_distance(center, coords))
+        std = np.sqrt(np.sum(dists ** 2))
+
+        return (
+            float(weighted_lon),
+            float(weighted_lat),
+            float(std)
+        )
 
 def main(args=None):
     if args == "onnx":

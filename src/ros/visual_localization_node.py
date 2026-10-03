@@ -45,14 +45,14 @@ class VisualLocalizationNode(Node):
         image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
 
         predictions = self.localizer.predict(image)
-        lon, lat = self.localizer.estimate_position(predictions)
+        est_lon, est_lat, est_std = self.localizer.estimate_position(predictions)
 
         output = PointStamped()
         output.header = msg.header
-        output.point.x = float(lon)
-        output.point.y = float(lat)
+        output.point.x = est_lon
+        output.point.y = est_lat
 
-        self.get_logger().info(f"{lon}, {lat}")
+        self.get_logger().info(f"{est_lon}, {est_lat}, {est_std}")
 
         # publish an estimated location downstream
         self.publisher.publish(output)
