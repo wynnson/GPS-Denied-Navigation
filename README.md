@@ -1,6 +1,7 @@
 # GPS Denied Navigation
 
 ## Testing ROS2 Locally
+We will be using ROS2 Lyrical.
 
 ### Docker Setup
 1.  Build Docker container (skip to step 2 if exists):
@@ -42,16 +43,10 @@ uv sync --no-dev                          # install needed python deps
 source .venv/bin/activate                 # activate venv
 ```
 
-6. Build `px4_msg` package:
+6. Build `px4_msgs` package. More can be found [here](https://github.com/PX4/px4_msgs):
 ```bash
-mkdir -p ~/ros2_ws/src
-cd ~/ros2_ws/src
-git clone https://github.com/PX4/px4_msgs.git
-cd ~/ros2_ws
-source /opt/ros/$ROS_DISTRO/setup.bash
-colcon build --packages-select px4_msgs
-source ~/ros2_ws/install/setup.bash
-ros2 interface show px4_msgs/msg/AuxGlobalPosition    # verify packcage works
+chmod +x scripts/setup_px4_msgs.sh
+./scripts/setup_px4_msgs.sh
 ```
 
 7. Open another terminal and run visual localization node:
@@ -124,15 +119,6 @@ lat_lon_reset_counter: 0
 
 ## Raspberry Pi (4B)
 
-#### Configuring WiFi:
-```bash
-sudo nano /etc/netplan/50-cloud-init.yaml   # Edit WiFi YAML config
-sudo systemctl restart systemd-networkd     # Restart network service
-sudo netplan generate                       # Parse config
-sudo netplan apply                          # Try to connect
-ip addr show wlan0                          # Check IP connection
-```
-
 #### SSH into the Pi:
 ```bash
 ssh drone@<IP-address>
@@ -160,59 +146,107 @@ git checkout
 #### ROS2 and RPI Installation on Raspberry Pi:
 This will also download other needed dependencies for the raspberry pi.
 ```bash
-chmod +x scripts/install_rpi_deps.sh    # If missing permision
-./scripts/install_rpi_deps.sh           # Installs needed deps and uv
+chmod +x scripts/install_rpi_deps.sh
+./scripts/install_rpi_deps.sh
 ```
 
 #### Setup PX4 ROS2 Package
-This is used to bridge ROS with Pixhawk.
+`px4_msgs` is used to bridge ROS with Pixhawk. More about it can be found [here](https://github.com/PX4/px4_msgs). On the Raspberry Pi it will take a long time (30+ mins).
+
 ```bash
-chmod +x scripts/setup_px4_msgs.sh      # Make executable
-./scripts/setup_px4_msgs.sh             # Installs 
+chmod +x scripts/setup_px4_msgs.sh
+./scripts/setup_px4_msgs.sh
+```
+
+#### Download Micro XRCE DDS Middleware
+This integrates PX4 and ROS2. See [here](https://docs.px4.io/main/en/middleware/uxrce_dds).
+
+```bash
+chmod +x scripts/install_micro_xrce_dds_agent.sh
+./scripts/install_micro_xrce_dds_agent.sh
 ```
 
 #### Download Python Dependencies to Virtual Environment
 ```bash
-uv sync --no-default-groups --group pi
+uv sync --no-dev
 ```
 
-#### Testing Pixhawk to Raspberry Pi
+#### Testing Raspberry Pi with uXRCE-DDS
+1. Configure PX4 in QGroundControl (Skip to 3 if done):
 
+```text
+MAV_1_CONFIG = Disabled
+UXRCE_DDS_CFG = TELEM2
+SER_TEL2_BAUD = 921600
+```
+
+2. Reboot pixhawk
+3. Start the Micro XRCE-DDS Agent on the Raspberry Pi. Check the Troubleshooting Raspberry Pi section for finding serial device.
 ```bash
-# Note Telem2 baudrate is 921600
-mavproxy.py --master=/dev/serial0 --baudrate 921600
-
-# Useful commands after running the above:
-watch HIGHRES_IMU                      # Accel, gyro, mag, pressure
-watch ATTITUDE                         # Roll, pitch, yaw
-watch ATTITUDE_QUATERNION              # Quaternion [w, x, y, z]
-watch ODOMETRY                         # EKF pose, velocity, covariance
-watch LOCAL_POSITION_NED               # Local NED position + velocity
-watch GLOBAL_POSITION_INT              # Fused lat, lon, alt, heading
-watch GPS_RAW_INT                      # Raw GPS fix, sats, accuracy
-watch ESTIMATOR_STATUS                 # EKF innovation ratios / health
-watch VFR_HUD                          # Airspeed, groundspeed, heading, alt
-watch BATTERY_STATUS                   # Voltage, current, battery state
-watch SYS_STATUS                       # Overall system health
-watch HEARTBEAT                        # MAVLink connection / vehicle state
-watch VIBRATION                        # IMU vibration and clipping
-watch SCALED_PRESSURE                  # Barometer pressure
-watch ALTITUDE                         # Various altitude estimates
-watch EXTENDED_SYS_STATE               # Landed / VTOL state
+micro-xrce-dds-agent serial --dev /dev/<serial-device> -b 921600
+micro-xrce-dds-agent serial --dev /dev/ttyAMA0 -b 921600    # we use ttyAMA0 UART
 ```
 
-#### Troubleshooting Raspberry Pi Issues
+### Troubleshooting Raspberry Pi Issues
 
-<!-- - **Not receiving telemetry from the Pixhawk?**
-    1. Check the wiring between the Raspberry Pi and Pixhawk.
-    2. Connect the Pixhawk to **QGroundControl**.
-    3. Go to **Vehicle Setup → Parameters**.
-    4. Search for `MAV_1_CONFIG`.
-    5. Check whether `MAV_1_CONFIG` is disabled.
-    6. If disabled, switch it to **TELEM 2**. -->
+#### Configuring WiFi:
+```bash
+sudo nano /etc/netplan/50-cloud-init.yaml   # Edit WiFi YAML config
+sudo systemctl restart systemd-networkd     # Restart network service
+sudo netplan generate                       # Parse config
+sudo netplan apply                          # Try to connect
+ip addr show wlan0                          # Check IP connection
+```
 
-- **Can't find the baud rate?**
-  - You can change it in **QGroundControl** under **Vehicle Setup → Parameters**.
+#### No Telemetry?:
+1. Use QGroundControl and connect Pixhawk directly with a microusb. 
+2. Check `Vechile Configuration > Parameters` and search for `UXRCE_DDS_CFG`. It should be `Telem2`. 
+3. Make sure nothing else is going through `Telem2`.
+4. Check `MAV_1_CONFIG` and make sure it is `disabled`.
+
+
+#### Startup Errors - Finding and Switching UART Devices:
+1. Run `ls -l /dev/ttyAMA* /dev/ttyS* 2>/dev/null`
+2. Make sure under `[all]`:
+    ```
+    enable_uart=1           # uart on
+    dtoverlay=disable-bt    # bluetooth off
+    ```
+3. Remove old binding:
+
+    Open up the txt file:
+    ```bash
+    sudo systemctl disable --now serial-getty@ttyAMA0.service
+    sudo nano /boot/firmware/current/cmdline.txt
+    ```
+    You should see:
+    ```text
+    console=serial0,115200 multipath=off dwc_otg.lpm_enable=0 console=tty1 root=LABEL=writable rootfstype=ext4 panic=10 rootwait fixrtc
+    ```
+    Replace:
+    ```
+    console=serial0,115200
+    ```
+    With:
+    ```
+    console=ttyS0,115200
+    ```
+    We need to do this so our console doesn't trigger `SysRq` events. Leave: 
+    ```
+    console=tty1
+    ```
+    This prevents the Pixhawk and the Linux serial console from trying to use the same UART. We effectively did a switcheroo: ttyAMA0 is now reserved for the Pixhawk, while the Linux serial console is moved to a different UART.
+
+4. Restart:
+    ```bash
+    sudo reboot
+    ```
+
+5. Check: `ls -l /dev/ttyAMA* /dev/ttyS* 2>/dev/null`. You should see `/dev/ttyAMA*`.
+
+
+#### Can't find the baud rate?:
+  - You can change it in QGroundControl under `Vehicle Configuration > Parameters`.
   - Make sure the Pixhawk and Raspberry Pi are configured to use the same baud rate.
   - Typical defaults:
     - **TELEM 1:** `57600`

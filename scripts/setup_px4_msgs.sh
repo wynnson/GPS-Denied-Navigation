@@ -17,4 +17,15 @@ colcon build --packages-select px4_msgs
 
 source "$HOME/ros2_ws/install/setup.bash"
 
+
+# Add ROS 2 and px4_msgs setup scripts to ~/.bashrc so every new shell is ROS-ready
+if ! grep -q 'source /opt/ros/lyrical/setup.bash' "$HOME/.bashrc"; then
+  echo 'source /opt/ros/lyrical/setup.bash' >> "$HOME/.bashrc"
+fi
+
+if ! grep -q 'source ~/ros2_ws/install/setup.bash' "$HOME/.bashrc"; then
+  echo 'source ~/ros2_ws/install/setup.bash' >> "$HOME/.bashrc"
+fi
+
+
 echo "px4_msgs setup complete"
