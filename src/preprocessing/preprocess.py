@@ -10,26 +10,30 @@ from src.database.tile_db_manager import TileDatabaseManager # CONTAINS FAISS
 
 
 @performance
-def preprocess(config: DictConfig, db_manager: TileDatabaseManager):
+def preprocess(
+    model_config: DictConfig,
+    preprocessing_config: DictConfig, 
+    db_manager: TileDatabaseManager
+):
     """Runs the preprocessing pipeline."""
     device = get_device()
-    model = create_model(config, device)
+    model = create_model(model_config, device)
 
     try:
         embed_raster(
-            file_path=config.raster.file_path,
+            file_path=preprocessing_config.raster.file_path,
             model=model,
             db_manager=db_manager,
-            stride=config.raster.stride,
-            window_size=config.raster.window_size,
-            batch_size=config.raster.batch_size,
-            dst_crs=config.raster.dst_crs,
+            stride=preprocessing_config.raster.stride,
+            window_size=preprocessing_config.raster.window_size,
+            batch_size=preprocessing_config.raster.batch_size,
+            dst_crs=preprocessing_config.raster.dst_crs,
         )
 
     finally:
         db_manager.close()
-        db_size = Path(config.output.db).stat().st_size
-        faiss_size = Path(config.output.db).stat().st_size
+        db_size = Path(preprocessing_config.output.db).stat().st_size
+        faiss_size = Path(preprocessing_config.output.db).stat().st_size
 
         print(f"SQLite DB: {db_size / (1024**2):.4f} MB")
         print(f"FAISS index: {faiss_size / (1024**2):.4f} MB")
@@ -37,16 +41,19 @@ def preprocess(config: DictConfig, db_manager: TileDatabaseManager):
 
 
 def main(args=None):
-    config_path = Path("src/config/default.yaml")
-    config = load_config(config_path)
+    preprocess_config_path = Path("src/config/preprocess.yaml")
+    model_config_path = Path("src/config/default.yaml")
+
+    preprocessing_config = load_config(preprocess_config_path)
+    model_config = load_config(model_config_path)
 
     db_manager = TileDatabaseManager(
-        db_path=config.output.db,
-        faiss_path=config.output.faiss,
-        embedding_dim=config.model.embedding_dim
+        db_path=preprocessing_config.output.db,
+        faiss_path=preprocessing_config.output.faiss,
+        embedding_dim=model_config.model.embedding_dim
     )
 
-    preprocess(config, db_manager)
+    preprocess(model_config, preprocessing_config, db_manager)
 
 
 if __name__ == "__main__":

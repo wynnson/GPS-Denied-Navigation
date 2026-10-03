@@ -1,0 +1,10 @@
+raster:
+  file_path: data/GT_NW.tif
+  stride: 400
+  window_size: 512
+  batch_size: 32
+  dst_crs: EPSG:4326
+
+output:
+  db: data/tiles.db
+  faiss: data/tiles.faiss

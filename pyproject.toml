@@ -8,6 +8,7 @@ dependencies = [
     "numpy",
     "faiss-cpu",
     "omegaconf",
+    "onnxruntime"
 ]
 
 [dependency-groups]
@@ -20,9 +21,6 @@ dev = [
     "jupyter",
     "onnx",
     "onnxscript",
-]
-
-pi = [
     "onnxruntime",
 ]
 

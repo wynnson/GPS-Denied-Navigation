@@ -33,18 +33,18 @@ class Localizer:
     """Class to localize position."""
     def __init__(
         self,
-        config: DictConfig,
+        model_config: DictConfig,
         db_manager: TileDatabaseManager,
         device: str = None
     ):
         self.device = device
         self.db_manager = db_manager
-        self.model = create_model(config, device)
-        self.k = config.inference.top_k
-        self.dist_epsilon = config.inference.dist_epsilon
-        self.score_epsilon = config.inference.score_epsilon
-        self.beta = config.inference.beta
-        self.anchor_bonus_weight = config.inference.anchor_bonus_weight
+        self.model = create_model(model_config, device)
+        self.k = model_config.inference.top_k
+        self.dist_epsilon = model_config.inference.dist_epsilon
+        self.score_epsilon = model_config.inference.score_epsilon
+        self.beta = model_config.inference.beta
+        self.anchor_bonus_weight = model_config.inference.anchor_bonus_weight
 
     @performance
     def predict(self, image: np.ndarray) -> list[Prediction]:
@@ -164,17 +164,20 @@ def main(args=None):
     else:
         path = "src/config/default.yaml"
 
-    config_path = Path(path)
-    config = load_config(config_path)
+    preprocessing_config_path = Path("src/config/preprocess.yaml")
+    model_config_path = Path(path)
+
+    model_config = load_config(model_config_path)
+    preprocessing_config = load_config(preprocessing_config_path)
     device = get_device()
 
     db_manager = TileDatabaseManager(
-        db_path=config.output.db,
-        faiss_path=config.output.faiss,
-        embedding_dim=config.model.embedding_dim
+        db_path=preprocessing_config.output.db,
+        faiss_path=preprocessing_config.output.faiss,
+        embedding_dim=model_config.model.embedding_dim
     )
 
-    localizer = Localizer(config, db_manager, device)
+    localizer = Localizer(model_config, db_manager, device)
 
     image = cv2.imread("data/query4.png") # ex
     res = localizer.predict(image)

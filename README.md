@@ -38,7 +38,7 @@ export PATH="/root/.local/bin:$PATH"      # save uv to path
 5. Virtual Environment:
 ```
 uv venv --system-site-packages            # allow access to system ROS packages
-uv sync --no-default-groups --group pi    # install needed python deps
+uv sync --no-dev                          # install needed python deps
 source .venv/bin/activate                 # activate venv
 ```
 

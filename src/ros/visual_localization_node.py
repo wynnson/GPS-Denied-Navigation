@@ -12,18 +12,22 @@ from src.utils.config import load_config
 
 
 class VisualLocalizationNode(Node):
-    def __init__(self, config: DictConfig):
+    def __init__(
+        self,
+        model_config: DictConfig,
+        preprocessing_config: DictConfig
+    ):
         super().__init__('visual_localization_node')
         self.bridge = CvBridge()
 
         self.db_manager = TileDatabaseManager(
-            db_path=config.output.db,
-            faiss_path=config.output.faiss,
-            embedding_dim=config.model.embedding_dim,
+            db_path=preprocessing_config.output.db,
+            faiss_path=preprocessing_config.output.faiss,
+            embedding_dim=model_config.model.embedding_dim,
         )
 
         self.localizer = Localizer(
-            config,
+            model_config,
             self.db_manager,
         )
 
@@ -90,12 +94,13 @@ class VisualLocalizationNode(Node):
 def main(args=None):
     rclpy.init(args=args)
         
-    config = load_config("src/config/default_onnx.yaml")
+    model_config = load_config("src/config/default_onnx.yaml")
+    preprocessing_config = load_config("src/config/preprocess.yaml")
 
-    node = VisualLocalizationNode(config)
+    node = VisualLocalizationNode(model_config, preprocessing_config)
 
     try:
-        print("RUNNING...")
+        print(f"RUNNING: Using {model_config.model.name} on {model_config.model.source}")
         rclpy.spin(node)
     except KeyboardInterrupt:
         print("\nProgram stopped safely by the user")

@@ -16,7 +16,7 @@ def show_all_tiles(
     path: Path,
     stride: int,
     window_size: int,
-    predictions: list[tuple] = None
+    predictions: list = None,
 ):
     """Visualizes all tiles in a tif"""
     with rasterio.open(path) as src:
@@ -28,8 +28,7 @@ def show_all_tiles(
         prediction_map = {}
         if predictions is not None:
             for prediction in predictions:
-                uid, score, _ = prediction
-                prediction_map[uid] = score
+                prediction_map[prediction.uid] = prediction.score
 
         tile_id = 0
         for r in range(0, src.height, stride):
@@ -46,7 +45,7 @@ def show_all_tiles(
                 if tile_id in prediction_map:
                     rect_fill = True
                     rect_facecolor = "red"
-                    rect_alpha = prediction_map[uid] ** 5 # score
+                    rect_alpha = prediction_map[tile_id] ** 5 # score
                     scatter_marker = "d"
                     scatter_color = "orange"
                     s = 500
@@ -102,7 +101,7 @@ def show_all_tiles(
 
 def show_predictions(
     path: Path,
-    predictions: list[tuple],
+    predictions: list,
     stride: int,
     window_size: int = 512
 ):
@@ -121,7 +120,9 @@ def show_predictions(
 
         top = 1
         for ax, prediction in zip(axes, predictions):
-            tile_id, score, coords = prediction
+            tile_id = prediction.uid
+            score = prediction.score
+            lon, lat = prediction.lon, prediction.lat
 
             row = tile_id // tiles_per_row
             col = tile_id % tiles_per_row
@@ -133,7 +134,6 @@ def show_predictions(
             image = src.read(RGB, window=window)
 
             image = np.moveaxis(image, 0, -1)
-            lon, lat = coords
 
             ax.imshow(image)
 
@@ -154,12 +154,13 @@ def show_predictions(
 
 def show_estimated_position(
     path: Path,
-    estimated_position: tuple[float, float, float], 
-    predictions: list[tuple],
+    estimated_position,
+    predictions: list,
     score_epsilon: float,
     dst_crs: str = "EPSG:4326",
 ):
-    est_lon, est_lat, est_std = estimated_position
+    est_lon = estimated_position.lon
+    est_lat = estimated_position.lat
 
     with rasterio.open(path) as src:
         image = src.read(RGB)
@@ -173,19 +174,19 @@ def show_estimated_position(
     fig, ax = plt.subplots(figsize=(15, 15))
     ax.imshow(image, extent=[left, right, bottom, top], origin="upper")
 
-    for uid, score, (lon, lat) in predictions:
-        if score < score_epsilon:
+    for prediction in predictions:
+        if prediction.score < score_epsilon:
             continue
 
-        ax.scatter(lon, lat, s=60, alpha=score, zorder=2, marker="d")
+        ax.scatter(prediction.lon, prediction.lat, s=60, alpha=prediction.score, zorder=2, marker="d")
         ax.plot(
-            [lon, est_lon],
-            [lat, est_lat],
-            alpha=score ** 4,
+            [prediction.lon, est_lon],
+            [prediction.lat, est_lat],
+            alpha=prediction.score ** 4,
             linewidth=1.5,
             zorder=1
         )
-        ax.text(lon, lat, str(uid), fontsize=8)
+        ax.text(prediction.lon, prediction.lat, str(prediction.uid), fontsize=8)
 
     ax.scatter(
         est_lon, est_lat, s=180, marker="^", zorder=3, label="Estimated Position", color="cyan"

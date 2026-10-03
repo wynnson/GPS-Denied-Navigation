@@ -1,15 +1,15 @@
 import os
+
+# FAISS + PyTorch error otherwise bc of OpenMP versioning
+# See: https://github.com/ultralytics/yolov5/issues/5086
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 import sqlite3
 import numpy as np
 
 from pathlib import Path
 
 import faiss # NEED THIS BELOW ANY TORCH IMPORTS!! (Best to keep it on bottom)
-
-
-# FAISS + PyTorch error otherwise bc of OpenMP versioning
-# See: https://github.com/ultralytics/yolov5/issues/5086
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
 class TileDatabaseManager:
