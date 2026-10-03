@@ -1,11 +1,5 @@
 # GPS Denied Navigation
 
-## Cloning the repository:
-```bash
-git clone <repository-url>
-cd <repository-folder>
-```
-
 ## Testing ROS2 Locally
 
 ### Docker Setup
@@ -129,6 +123,29 @@ lat_lon_reset_counter: 0
 
 
 ## Raspberry Pi (4B)
+
+#### ROS2 on Raspberry Pi:
+```bash
+chmod +x scripts/install_ros_deps.sh    # If missing permision
+sudo ./scripts/install_ros_deps.sh
+```
+
+#### Using ssh and cloning:
+```bash
+ssh drone@<IP-address>
+git clone --filter=blob:none --no-checkout https://github.com/wynnson/GPS-Denied-Navigation.git
+cd GPS-Denied-Navigation
+
+# Only pull needed files (ignore using !/)
+git sparse-checkout init --no-cone
+git sparse-checkout set \
+  '/*' \ 
+  '!/notebook/' \
+  '!/visualization/' \
+  '!/data/GT_NW.tif'
+git checkout
+
+```
 
 #### Installation
 ```bash
