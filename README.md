@@ -140,7 +140,9 @@ ssh drone@<IP-address>
 
 #### Cloning:
 ```bash
-git clone --filter=blob:none --no-checkout https://github.com/wynnson/GPS-Denied-Navigation.git
+git clone --filter=blob:none --no-checkout \
+  https://github.com/wynnson/GPS-Denied-Navigation.git
+
 cd GPS-Denied-Navigation
 
 # Only pull needed files (ignore using !/)
@@ -155,10 +157,18 @@ EOF
 git checkout
 ```
 
-#### ROS2 on Raspberry Pi:
+#### ROS2 and RPI Installation on Raspberry Pi:
+This will also download other needed dependencies for the raspberry pi.
 ```bash
 chmod +x scripts/install_rpi_deps.sh    # If missing permision
 ./scripts/install_rpi_deps.sh           # Installs needed deps and uv
+```
+
+#### Setup PX4 ROS2 Package
+This is used to bridge ROS with Pixhawk.
+```bash
+chmod +x scripts/setup_px4_msgs.sh      # Make executable
+./scripts/setup_px4_msgs.sh             # Installs 
 ```
 
 #### Download Python Dependencies to Virtual Environment
