@@ -7,6 +7,13 @@ from cv_bridge import CvBridge
 
 
 class TestVisualLocalizationNode(Node):
+    """
+    TEST CLASS
+    ==========
+    Integration test:
+    This test class mocks a camera by constantly reading an image file.
+    This class is meant to check ROS implementation works as expected.
+    """
     def __init__(self):
         super().__init__("test_visual_localization_node")
 
@@ -19,6 +26,9 @@ class TestVisualLocalizationNode(Node):
         self.bridge = CvBridge()
 
         self.image = cv2.imread("data/query4.png")
+        
+        if self.image is None:
+            raise FileExistsError("Could not load image")
 
         self.timer = self.create_timer(
             1.0,              # every 1 second
@@ -31,8 +41,10 @@ class TestVisualLocalizationNode(Node):
             encoding="bgr8",
         )
 
-        self.publisher.publish(msg)
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = "camera"
 
+        self.publisher.publish(msg)
         self.get_logger().info("Published test image")
 
 
@@ -41,10 +53,15 @@ def main(args=None):
 
     node = TestVisualLocalizationNode()
 
-    rclpy.spin(node)
-
-    node.destroy_node()
-    rclpy.shutdown()
+    print("RUNNING TEST...")
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        print("\nProgram stopped safely by the user")
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+        print("Cleaned resources and exited")
 
 
 if __name__ == "__main__":

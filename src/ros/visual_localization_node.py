@@ -2,12 +2,12 @@ import rclpy
 
 from rclpy.node import Node
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import PointStamped
 from cv_bridge import CvBridge
 from omegaconf.dictconfig import DictConfig
+from px4_msgs.msg import AuxGlobalPosition
 
 from src.database.tile_db_manager import TileDatabaseManager
-from src.inference.localizer import Localizer
+from src.inference.localizer import EstimatedGeoPosition, Localizer
 from src.utils.config import load_config
 
 
@@ -35,27 +35,51 @@ class VisualLocalizationNode(Node):
         )
 
         self.publisher = self.create_publisher(
-            PointStamped,
-            "/visual_position",
-            10
+            AuxGlobalPosition,
+            "/fmu/in/aux_global_position",
+            10,
         )
+
+    def publish_aux_position(
+        self,
+        image_time_stamp_microseconds: float, 
+        estimate: EstimatedGeoPosition
+    ):
+        msg = AuxGlobalPosition()
+
+        msg.timestamp = self.get_clock().now().nanoseconds // 1_000
+        msg.timestamp_sample = image_time_stamp_microseconds
+
+        msg.source = AuxGlobalPosition.SOURCE_VISION
+
+        msg.lon = estimate.lon
+        msg.lat = estimate.lat
+        msg.eph = estimate.eph
+
+        self.publisher.publish(msg)
 
     def image_callback(self, msg: Image):
         """Called when message arrvies in the queue"""
         image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
-
         predictions = self.localizer.predict(image)
-        est_lon, est_lat, est_std = self.localizer.estimate_position(predictions)
+        estimate = self.localizer.estimate_position(predictions)
 
-        output = PointStamped()
-        output.header = msg.header
-        output.point.x = est_lon
-        output.point.y = est_lat
+        # no-op
+        if not estimate.valid:
+            return
 
-        self.get_logger().info(f"{est_lon}, {est_lat}, {est_std}")
+        image_time_stamp = (
+            msg.header.stamp.sec * 1_000_000
+            + msg.header.stamp.nanosec // 1_000
+        )
 
-        # publish an estimated location downstream
-        self.publisher.publish(output)
+        self.publish_aux_position(image_time_stamp, estimate)
+
+        self.get_logger().info(
+            f"Est Lon: {estimate.lon}, " 
+            f"Est Lat: {estimate.lat}, "
+            f"Est Error: {estimate.eph}"
+        )
 
     def destroy_node(self):
         """Cleanup node"""
@@ -71,10 +95,14 @@ def main(args=None):
     node = VisualLocalizationNode(config)
 
     try:
+        print("RUNNING...")
         rclpy.spin(node)
+    except KeyboardInterrupt:
+        print("\nProgram stopped safely by the user")
     finally:
         node.destroy_node()
         rclpy.shutdown()
+        print("Cleaned resources and exited")
 
 
 if __name__ == "__main__":

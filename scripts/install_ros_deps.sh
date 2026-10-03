@@ -15,4 +15,6 @@ apt install -y \
     ros-$ROS_DISTRO-sensor-msgs \
     ros-$ROS_DISTRO-geometry-msgs
 
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
 rm -rf /var/lib/apt/lists/*

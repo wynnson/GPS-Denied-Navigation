@@ -1,13 +1,19 @@
 import numpy as np
 import math
 
+from collections.abc import Sequence
 
-def haversine_distance(p1, p2) -> float:
-    """Get distance between 2 world coordinates"""
+
+EARTH_RADIUS_M = 6371000.0      # rad of earth in meters
+
+
+def haversine_distance(p1: Sequence[float], p2: Sequence[float]) -> float:
+    """
+    Get distance between 2 world coordinates.
+    Requires points to be in (lon, lat)
+    """
     lon1, lat1 = p1
     lon2, lat2 = p2
-
-    R = 6371000 # rad of earth
 
     phi1 = math.radians(lat1)
     phi2 = math.radians(lat2)
@@ -22,5 +28,5 @@ def haversine_distance(p1, p2) -> float:
         * math.sin(delta_lambda / 2) ** 2
     )
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    distance = R * c
+    distance = EARTH_RADIUS_M * c
     return distance

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+from dataclasses import dataclass
 from pathlib import Path
 from omegaconf import DictConfig
 
@@ -10,6 +11,22 @@ from src.utils.device import get_device
 from src.utils.decorators import performance
 from src.utils.distance import haversine_distance
 from src.database.tile_db_manager import TileDatabaseManager # CONTAINS FAISS
+
+
+@dataclass
+class Prediction:
+    uid: int
+    score: float
+    lon: float
+    lat: float
+
+
+@dataclass
+class EstimatedGeoPosition:
+    valid: bool
+    lon: float = 0.0
+    lat: float = 0.0
+    eph: float = 0.0    # horizontal pos error
 
 
 class Localizer:
@@ -30,61 +47,115 @@ class Localizer:
         self.anchor_bonus_weight = config.inference.anchor_bonus_weight
 
     @performance
-    def predict(self, image: np.ndarray) -> list[tuple[int, float, tuple[float, float]]]:
+    def predict(self, image: np.ndarray) -> list[Prediction]:
         """Predicts passed frame image"""
         embedding = self.model.embed_image(image)
         scores, uids = self.db_manager.search(embedding, k=self.k)
 
         res = []
 
+        # pre sorted by scores
         for uid, score in zip(uids[0], scores[0]):
             coords = self.db_manager.get_coords(int(uid))
-            res.append((
-                int(uid),
-                float(score),
-                coords
+            lon, lat = coords
+            res.append(Prediction(
+                uid=int(uid),
+                score=float(score),
+                lon=float(lon),
+                lat=float(lat)
             ))
 
         return res
 
-    def estimate_position(self, predictions: list[tuple]) -> tuple[float, float, float]:
-        """Based on the top k predictions, make a location estimate"""
-        anchor = predictions[0][2]
+    def prune_acceptable_candidates(self, predictions: list[Prediction]) -> list[Prediction]:
+        """
+        Gets acceptable candidates in the format:
+        
+            [(score, (lon, lat)) ... ]
+        
+        by pruning from anchor based on haversine dist and score
+        """
+        anchor = predictions[0]     # top 1 
+        anchor_coord = anchor.lon, anchor.lat
         candidates = []
 
-        for uid, score, coords in predictions:
-            dist = haversine_distance(anchor, coords)
-            if dist > self.dist_epsilon or score < self.score_epsilon:
+        for prediction in predictions:
+            prediction_coord = prediction.lon, prediction.lat
+            dist = haversine_distance(anchor_coord, prediction_coord)
+            if dist > self.dist_epsilon or prediction.score < self.score_epsilon:
                 continue
 
-            candidates.append((score, coords))
+            candidates.append(prediction)
 
-        scores = np.array([score for score, _ in candidates])
+        return candidates
+
+    def get_weights(self, candidates: list[Prediction]) -> np.ndarray:
+        """Gets the weight contribution for each candidate"""
+        scores = np.array([candidate.score for candidate in candidates])
 
         logits = self.beta * (scores - scores.max())
         logits[0] += self.anchor_bonus_weight
 
-        weights = np.exp(logits)    # softmax weighting 
+        # softmax weighting 
+        weights = np.exp(logits)
         weights /= weights.sum()
 
+        return weights
+
+    def calculate_weighted_position(
+        self,
+        candidates: list[Prediction],
+        weights: np.ndarray,
+    ) -> tuple[float, float]:
+        """Calculate the final weighted position"""
         weighted_lon = 0.0
         weighted_lat = 0.0
 
-        for weight, (_, (lon, lat)) in zip(weights, candidates):
-            weighted_lon += weight * lon
-            weighted_lat += weight * lat
+        for weight, candidate in zip(weights, candidates):
+            weighted_lon += weight * candidate.lon
+            weighted_lat += weight * candidate.lat
 
-        center = weighted_lon, weighted_lat
+        return weighted_lon, weighted_lat
 
-        dists = np.array([])
-        for score, coords in candidates:
-            dists.append(haversine_distance(center, coords))
-        std = np.sqrt(np.sum(dists ** 2))
+    def compute_horizontal_std(
+        self,
+        center: tuple[float, float],
+        candidates: list[Prediction],
+        weights: np.ndarray
+    ) -> float:
+        """Computes std of our weighted candidate locations"""
+        dists = []
+        for candidate in candidates:
+            candidate_coords = candidate.lon, candidate.lat
+            dists.append(haversine_distance(center, candidate_coords))
 
-        return (
-            float(weighted_lon),
-            float(weighted_lat),
-            float(std)
+        dists = np.asarray(dists, dtype=float)
+        var = np.sum(weights * dists ** 2)
+        horizontal_std = np.sqrt(var)
+
+        return float(horizontal_std)
+
+    def estimate_position(self, predictions: list[Prediction]) -> EstimatedGeoPosition:
+        """Based on the top k predictions, make a location estimate"""
+        if not predictions:
+            return EstimatedGeoPosition(valid=False)
+
+        candidates = self.prune_acceptable_candidates(predictions)
+
+        if len(candidates) == 0:
+            return EstimatedGeoPosition(valid=False)
+
+        weights = self.get_weights(candidates)
+        center = self.calculate_weighted_position(candidates, weights)
+        horizontal_std = self.compute_horizontal_std(center, candidates, weights)
+
+        est_lon, est_lat = center
+
+        return EstimatedGeoPosition(
+            valid=True,
+            lon=est_lon,
+            lat=est_lat,
+            eph=horizontal_std
         )
 
 def main(args=None):
