@@ -158,12 +158,11 @@ git checkout
 #### ROS2 on Raspberry Pi:
 ```bash
 chmod +x scripts/install_rpi_deps.sh    # If missing permision
-./scripts/install_ros_deps.sh           # Installs needed deps and uv
+./scripts/install_rpi_deps.sh           # Installs needed deps and uv
 ```
 
 #### Download Python Dependencies to Virtual Environment
 ```bash
-export PATH="$HOME/.local/bin:$PATH"    # Set uv path
 uv sync --no-default-groups --group pi
 ```
 

@@ -24,7 +24,6 @@ dev = [
 
 pi = [
     "onnxruntime",
-    "mavproxy",
 ]
 
 [tool.uv]

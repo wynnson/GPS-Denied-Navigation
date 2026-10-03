@@ -2,10 +2,10 @@
 
 # NOTE:
 # Need perms:
-#   chmod +x scripts/install_ros_deps.sh
+#   chmod +x scripts/install_rpi_deps.sh
 #
 # Run:
-#   ./scripts/install_ros_deps.sh
+#   ./scripts/install_rpi_deps.sh
 
 set -e
 
