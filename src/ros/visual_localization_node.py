@@ -17,7 +17,7 @@ class VisualLocalizationNode(Node):
         model_config: DictConfig,
         preprocessing_config: DictConfig
     ):
-        super().__init__('visual_localization_node')
+        super().__init__("visual_localization_node")
         self.bridge = CvBridge()
 
         self.db_manager = TileDatabaseManager(

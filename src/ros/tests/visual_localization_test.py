@@ -20,9 +20,9 @@ class TestVisualLocalizationNode(Node):
 
         if pi:
             # Takes ~5 seconds to process image on pi4
-            cooldown_s = 5.5
+            COOLDOWN_S = 5.5
         else:
-            cooldown_s = 1.0
+            COOLDOWN_S = 1.0
 
         self.publisher = self.create_publisher(
             Image,
@@ -33,12 +33,12 @@ class TestVisualLocalizationNode(Node):
         self.bridge = CvBridge()
 
         self.image = cv2.imread("data/query4.png")
-        
+
         if self.image is None:
             raise FileExistsError("Could not load image")
 
         self.timer = self.create_timer(
-            cooldown_s,
+            COOLDOWN_S,
             self.publish_image
         )
 

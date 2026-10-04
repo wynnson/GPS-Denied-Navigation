@@ -138,6 +138,10 @@ lat_lon_reset_counter: 0
 ```bash
 ssh drone@<IP-address>
 ```
+On the Pi you can find IP by using:
+```bash
+ip addr show wlan0
+```
 
 #### Cloning:
 ```bash
