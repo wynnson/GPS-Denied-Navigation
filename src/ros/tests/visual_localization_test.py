@@ -1,3 +1,4 @@
+import argparse
 import cv2
 import rclpy
 
@@ -14,8 +15,14 @@ class TestVisualLocalizationNode(Node):
     This test class mocks a camera by constantly reading an image file.
     This class is meant to check ROS implementation works as expected.
     """
-    def __init__(self):
+    def __init__(self, pi: bool = False):
         super().__init__("test_visual_localization_node")
+
+        if pi:
+            # Takes ~5 seconds to process image on pi4
+            cooldown_s = 5.5
+        else:
+            cooldown_s = 1.0
 
         self.publisher = self.create_publisher(
             Image,
@@ -31,7 +38,7 @@ class TestVisualLocalizationNode(Node):
             raise FileExistsError("Could not load image")
 
         self.timer = self.create_timer(
-            1.0,              # every 1 second
+            cooldown_s,
             self.publish_image
         )
 
@@ -49,11 +56,21 @@ class TestVisualLocalizationNode(Node):
 
 
 def main(args=None):
-    rclpy.init(args=args)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--pi",
+        action="store_true",
+        help="Run in Raspberry Pi mode",
+    )
 
-    node = TestVisualLocalizationNode()
+    args, ros_args = parser.parse_known_args()
 
-    print("RUNNING TEST...")
+    rclpy.init(args=ros_args)
+
+    node = TestVisualLocalizationNode(pi=args.pi)
+
+    print(f"RUNNING TEST ... pi={args.pi}")
+
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

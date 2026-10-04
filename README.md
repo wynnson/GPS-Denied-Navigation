@@ -221,8 +221,8 @@ source .venv/bin/activate                 # activate venv
 
 #### Running Ros Nodes:
 ```bash
-python3 -m src.ros.visual_localization_node   # Localization node
-
+python3 -m src.ros.visual_localization_node               # Localization node
+python3 -m src.ros.tests.visual_localization_test --pi    # Mock camera node
 ```
 
 ### Troubleshooting Raspberry Pi Issues
