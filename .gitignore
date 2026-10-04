@@ -1,9 +1,9 @@
 .DS_Store
 .vscode
 
-*.db
+# *.db
 *.db-journal
-*.faiss
+# *.faiss
 *.tif
 
 .env

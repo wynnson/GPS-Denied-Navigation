@@ -219,6 +219,12 @@ uv sync --no-dev                          # install needed python deps
 source .venv/bin/activate                 # activate venv
 ```
 
+#### Running Ros Nodes:
+```bash
+python3 -m src.ros.visual_localization_node   # Localization node
+
+```
+
 ### Troubleshooting Raspberry Pi Issues
 
 #### Configuring WiFi:

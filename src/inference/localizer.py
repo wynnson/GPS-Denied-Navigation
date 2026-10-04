@@ -57,6 +57,9 @@ class Localizer:
         # pre sorted by scores
         for uid, score in zip(uids[0], scores[0]):
             coords = self.db_manager.get_coords(int(uid))
+            if coords is None:
+                continue
+
             lon, lat = coords
             res.append(Prediction(
                 uid=int(uid),
