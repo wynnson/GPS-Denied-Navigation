@@ -7,11 +7,10 @@ Navigate with just a preprocessed map on consumer hardware in GPS denied environ
 ## Table of Contents
 
 - [Preprocessing](#preprocessing)
-- [Converting to ONNX](#converting-to-onnx)
-- [Testing ROS2 Locally](#testing-ros2-locally)
-- [Docker Setup](#docker-setup)
-- [Example Outputs](#example-outputs)
-- [Raspberry Pi (4B)](#raspberry-pi-4b)
+- [ONNX Export](#converting-to-onnx)
+- [Local ROS 2 Testing](#testing-ros2-locally)
+- [Raspberry Pi 4B Setup](#raspberry-pi-4b)
+- [Raspberry Pi Troubleshooting](#troubleshooting-raspberry-pi-issues)
 
 
 ## Preprocessing
