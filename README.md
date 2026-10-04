@@ -1,7 +1,26 @@
 # GPS Denied Navigation
+Navigate with just a preprocessed map on consumer hardware in GPS denied environments. 
+
+<img width="9528" height="6549" alt="archdiagram" src="https://github.com/user-attachments/assets/bdcc75a3-01d0-4732-952d-7ca623162d79" />
+
+
+## Table of Contents
+
+- [Preprocessing](#preprocessing)
+- [Converting to ONNX](#converting-to-onnx)
+- [Testing ROS2 Locally](#testing-ros2-locally)
+- [Docker Setup](#docker-setup)
+- [Example Outputs](#example-outputs)
+- [Raspberry Pi (4B)](#raspberry-pi-4b)
+
 
 ## Preprocessing
-Upload a tiff to data and adjust the raster file path.
+
+<img width="4239" height="1445" alt="preprocess" src="https://github.com/user-attachments/assets/656a7107-5928-4570-8ee9-1744c988b46f" />
+
+
+Upload a tiff to the `/data` folder and adjust the raster file path inside `/config/preprocess.yaml`
+.
 To create preprocessed DB, run:
 ```bash
 python3 -m src.preprocessing.preprocess
@@ -134,6 +153,10 @@ lat_lon_reset_counter: 0
 
 ## Raspberry Pi (4B)
 
+### Inference
+<img width="4445" height="1749" alt="inferarch" src="https://github.com/user-attachments/assets/35f512a3-f0da-4d38-ae95-81b11e8f4628" />
+
+
 #### SSH into the Pi:
 ```bash
 ssh drone@<IP-address>
@@ -178,12 +201,14 @@ chmod +x scripts/setup_px4_msgs.sh
 ```
 
 #### Download Micro XRCE DDS Middleware
+![PX4 uXRCE-DDS ROS 2 Architecture](https://docs.px4.io/main/assets/architecture_xrce-dds_ros2.CpY9H3P9.svg)
 This integrates PX4 and ROS2. See [here](https://docs.px4.io/main/en/middleware/uxrce_dds).
 
 ```bash
 chmod +x scripts/install_micro_xrce_dds_agent.sh
 ./scripts/install_micro_xrce_dds_agent.sh
 ```
+
 
 Running the agent:
 ```bash
