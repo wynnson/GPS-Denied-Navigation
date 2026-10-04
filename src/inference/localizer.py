@@ -146,6 +146,13 @@ class Localizer:
 
         return float(horizontal_std)
 
+    def calculate_max_score(predictions: list[Prediction]) -> float:
+        """Helper to calculate the max score when everything is filtered"""
+        max_score = 0
+        for prediction in predictions:
+            max_score = max(prediction.score, max_score)
+        return max_score
+
     def estimate_position(self, predictions: list[Prediction]) -> EstimatedGeoPosition:
         """Based on the top k predictions, make a location estimate"""
         if not predictions:
@@ -154,7 +161,8 @@ class Localizer:
         candidates = self.prune_acceptable_candidates(predictions)
 
         if len(candidates) == 0:
-            logger.info("Localization skipped: no candidates passed distance/score thresholds")
+            max_score = self.calculate_max_score(predictions)
+            logger.info(f"Localization skipped: no candidates passed. Highest score: {max_score}")
             return EstimatedGeoPosition(valid=False)
 
         weights = self.get_weights(candidates)

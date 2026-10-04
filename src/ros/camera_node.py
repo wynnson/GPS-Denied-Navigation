@@ -49,6 +49,7 @@ class CameraNode(Node):
 
         # ======= DEBUG ======= #
         
+        # Saves last img to tmp folder 
         frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         cv2.imwrite(SAVE_PATH, frame_bgr)
         

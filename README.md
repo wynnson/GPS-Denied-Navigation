@@ -250,9 +250,19 @@ To watch the logs, use:
 ```bash
 journalctl -u gps-denied.service -f
 ```
-
+To restart the service:
+```bash
+sudo systemctl start gps-denied.service
+```
 
 ### Troubleshooting Raspberry Pi Issues
+
+#### Debugging Last Image
+Inside `camer_node.py`, there is `DEBUG` comment. Uncomment that if you need to debug the feed from the rpi camera. On your own device, copy that saved image over (yes this sucks).
+```bash
+scp drone@<ip-addr>:/tmp/latest_camera.jpg ~/<destination-folder>
+```
+Make sure to comment when done.
 
 #### Configuring WiFi:
 ```bash
