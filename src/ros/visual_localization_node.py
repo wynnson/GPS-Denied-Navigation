@@ -4,7 +4,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from omegaconf.dictconfig import DictConfig
-from px4_msgs.msg import AuxGlobalPosition
+from px4_msgs.msg import VehicleGlobalPosition
 
 from src.database.tile_db_manager import TileDatabaseManager
 from src.inference.localizer import EstimatedGeoPosition, Localizer
@@ -39,26 +39,28 @@ class VisualLocalizationNode(Node):
         )
 
         self.publisher = self.create_publisher(
-            AuxGlobalPosition,
+            VehicleGlobalPosition,
             "/fmu/in/aux_global_position",
             10,
         )
 
-    def publish_aux_position(
+    def publish_position(
         self,
-        image_time_stamp_microseconds: float, 
+        image_time_stamp_microseconds: int, 
         estimate: EstimatedGeoPosition
     ):
-        msg = AuxGlobalPosition()
+        msg = VehicleGlobalPosition()
 
         msg.timestamp = self.get_clock().now().nanoseconds // 1_000
         msg.timestamp_sample = image_time_stamp_microseconds
 
-        msg.source = AuxGlobalPosition.SOURCE_VISION
-
         msg.lon = estimate.lon
         msg.lat = estimate.lat
         msg.eph = estimate.eph
+
+        msg.lat_lon_valid = True
+        msg.alt_valid = False
+        msg.terrain_alt_valid = False
 
         self.publisher.publish(msg)
 
@@ -77,7 +79,7 @@ class VisualLocalizationNode(Node):
             + msg.header.stamp.nanosec // 1_000
         )
 
-        self.publish_aux_position(image_time_stamp, estimate)
+        self.publish_position(image_time_stamp, estimate)
 
         self.get_logger().info(
             f"Est Lon: {estimate.lon}, " 

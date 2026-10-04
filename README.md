@@ -170,7 +170,7 @@ chmod +x scripts/install_rpi_deps.sh
 
 ```bash
 chmod +x scripts/setup_px4_msgs.sh
-./scripts/setup_px4_msgs.sh
+./scripts/setup_px4_msgs.sh       # IMPORTANT: Make sure to edit the firmware version you are on
 ```
 
 #### Download Micro XRCE DDS Middleware

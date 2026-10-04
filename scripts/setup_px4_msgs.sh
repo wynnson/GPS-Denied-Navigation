@@ -7,7 +7,10 @@ source /opt/ros/lyrical/setup.bash
 mkdir -p "$HOME/ros2_ws/src"
 
 if [ ! -d "$HOME/ros2_ws/src/px4_msgs" ]; then
-  git clone https://github.com/PX4/px4_msgs.git \
+  git clone \
+    --branch release/1.17 \       # change this if needed
+    --single-branch \
+    https://github.com/PX4/px4_msgs.git \
     "$HOME/ros2_ws/src/px4_msgs"
 fi
 
