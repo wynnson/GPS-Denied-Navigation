@@ -39,7 +39,8 @@ sudo apt install -y \
   python3-colcon-common-extensions \
   python3-rosdep \
   python3-vcstool \
-  rpicam-apps
+  rpicam-apps \
+  python3-picamera2 \
 
 # ===== uv installation =====
 

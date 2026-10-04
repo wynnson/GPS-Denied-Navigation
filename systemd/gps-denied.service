@@ -1,0 +1,17 @@
+[Unit]
+Description=GPS Denied Navigation ROS 2 Stack
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=drone
+WorkingDirectory=/home/drone/GPS-Denied-Navigation
+
+ExecStart=/home/drone/GPS-Denied-Navigation/scripts/start_stack.sh
+
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

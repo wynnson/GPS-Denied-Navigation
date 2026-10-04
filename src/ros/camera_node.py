@@ -1,5 +1,4 @@
 import rclpy
-import cv2
 import time
 
 from picamera2 import Picamera2
@@ -53,3 +52,22 @@ class CameraNode(Node):
     def destroy_node(self):
         self.camera.stop()
         super().destroy_node()
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    
+    node = CameraNode()
+
+    try:
+        print("RUNNING: Camera Node")
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        print("\nProgram stopped safely by the user")
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+        print("Cleaned resources and exited")
+
+if __name__ == "__main__":
+    main()

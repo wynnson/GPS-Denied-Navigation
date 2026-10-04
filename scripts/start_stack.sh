@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
 REPO="$HOME/GPS-Denied-Navigation"
@@ -20,7 +21,7 @@ cleanup() {
     echo
     echo "[STOP] Shutting down stack..."
 
-    kill "${TEST_PID:-}" 2>/dev/null || true
+    kill "${CAMERA_PID:-}" 2>/dev/null || true
     kill "${LOCALIZER_PID:-}" 2>/dev/null || true
     kill "${XRCE_PID:-}" 2>/dev/null || true
 
@@ -49,19 +50,19 @@ sleep 2
 
 
 # ============= START CAMERA ============= #
-echo "[START] Test Camera Node"
-python3 -m src.ros.visual_localization_test --pi &
-TEST_PID=$!
+echo "[START] Camera Node"
+python3 -m src.ros.camera_node &
+CAMERA_PID=$!
 
 
 echo "[READY] All processes started"
 echo "XRCE PID:      $XRCE_PID"
 echo "Localizer PID: $LOCALIZER_PID"
-echo "Test PID:      $TEST_PID"
+echo "Camera PID:      $CAMERA_PID"
 
 
 # If any one process dies, stop the whole stack.
-wait -n "$XRCE_PID" "$LOCALIZER_PID" "$TEST_PID"
+wait -n "$XRCE_PID" "$LOCALIZER_PID" "$CAMERA_PID"
 
 echo "[ERROR] One process exited."
 exit 1

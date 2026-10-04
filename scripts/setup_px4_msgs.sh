@@ -6,12 +6,15 @@ source /opt/ros/lyrical/setup.bash
 
 mkdir -p "$HOME/ros2_ws/src"
 
-if [ ! -d "$HOME/ros2_ws/src/px4_msgs" ]; then
+PX4_MSGS_BRANCH="release/1.17"    # change version if needed
+PX4_MSGS_DIR="$HOME/ros2_ws/src/px4_msgs"
+
+if [ ! -d "$PX4_MSGS_DIR" ]; then
   git clone \
-    --branch release/1.17 \       # change this if needed
+    --branch "$PX4_MSGS_BRANCH" \
     --single-branch \
     https://github.com/PX4/px4_msgs.git \
-    "$HOME/ros2_ws/src/px4_msgs"
+    "$PX4_MSGS_DIR"
 fi
 
 cd "$HOME/ros2_ws"
