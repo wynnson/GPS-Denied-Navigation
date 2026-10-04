@@ -1,3 +1,4 @@
+import cv2
 import rclpy
 import time
 
@@ -5,6 +6,9 @@ from picamera2 import Picamera2
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
+
+
+SAVE_PATH = "/tmp/latest_camera.jpg"
 
 
 class CameraNode(Node):
@@ -42,6 +46,13 @@ class CameraNode(Node):
         msg = self.bridge.cv2_to_imgmsg(
             frame, encoding="rgb8"
         )
+
+        # ======= DEBUG ======= #
+        
+        frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(SAVE_PATH, frame_bgr)
+        
+        # ===================== #
 
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "camera"

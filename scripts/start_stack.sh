@@ -27,8 +27,8 @@ cleanup() {
 
 trap cleanup EXIT SIGINT SIGTERM
 
-echo "Beginning startup..."
-sleep 2         # Buffer
+sleep 3 # buffer start
+
 
 # ============= START AGENT ============= #
 echo "[START] Micro XRCE-DDS Agent"
@@ -36,14 +36,13 @@ MicroXRCEAgent serial \
     --dev /dev/ttyAMA0 \
     -b 921600 &
 XRCE_PID=$!     # stores process ID
-sleep 15        # Adjust as need be (sec from power to launch)
+sleep 5
 
 
 # ============= START LOCALIZATION ============= #
 echo "[START] Visual Localization"
 python3 -m src.ros.visual_localization_node &
 LOCALIZER_PID=$!
-sleep 2
 
 
 # ============= START CAMERA ============= #
