@@ -10,6 +10,9 @@ WorkingDirectory=/home/drone/GPS-Denied-Navigation
 
 ExecStart=/home/drone/GPS-Denied-Navigation/scripts/start_stack.sh
 
+KillMode=mixed
+TimeoutStopSec=10
+
 Restart=on-failure
 RestartSec=3
 

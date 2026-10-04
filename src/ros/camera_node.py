@@ -47,7 +47,7 @@ class CameraNode(Node):
         msg.header.frame_id = "camera"
 
         self.publisher.publish(msg)
-        self.get_logger().info(f"Published camera frame: {frame}")
+        self.get_logger().info(f"Published camera frame")
 
     def destroy_node(self):
         self.camera.stop()
@@ -68,6 +68,7 @@ def main(args=None):
         node.destroy_node()
         rclpy.shutdown()
         print("Cleaned resources and exited")
+
 
 if __name__ == "__main__":
     main()

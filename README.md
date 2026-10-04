@@ -223,11 +223,30 @@ uv sync --no-dev                          # install needed python deps
 source .venv/bin/activate                 # activate venv
 ```
 
-#### Running Ros Nodes:
+#### Running Ros Nodes Manually:
+Run in seperate terminals. Make sure that the XRCE agent has started.
 ```bash
 python3 -m src.ros.visual_localization_node               # Localization node
-python3 -m src.ros.tests.visual_localization_test --pi    # Mock camera node
+python3 -m src.ros.camera_node                            # REAL camera node
+python3 -m src.ros.tests.visual_localization_test --pi    # MOCK camera node
 ```
+
+#### Auto-boot Raspberry Pi:
+This will create a startup daemon managed by systemd. It will auto launch all processes when connected to power. Check out the `start_stack.sh` script for more details.
+```bash
+# Make startup script executable
+chmod +x ~/GPS-Denied-Navigation/scripts/start_stack.sh
+
+# Copy systemd service into place
+sudo cp ~/GPS-Denied-Navigation/systemd/gps-denied.service \
+  /etc/systemd/system/gps-denied.service
+
+sudo systemctl daemon-reload              # Reload systemd
+sudo systemctl enable gps-denied.service  # Enable service on boot
+sudo systemctl start gps-denied.service   # Start it now
+systemctl status gps-denied.service       # Check status
+```
+
 
 ### Troubleshooting Raspberry Pi Issues
 
