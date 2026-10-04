@@ -1,4 +1,5 @@
 import cv2
+import logging
 import numpy as np
 
 from dataclasses import dataclass
@@ -11,6 +12,10 @@ from src.utils.device import get_device
 from src.utils.decorators import performance
 from src.utils.distance import haversine_distance
 from src.database.tile_db_manager import TileDatabaseManager # CONTAINS FAISS
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -146,6 +151,7 @@ class Localizer:
         candidates = self.prune_acceptable_candidates(predictions)
 
         if len(candidates) == 0:
+            logger.info("Nothing matched, skipping estimate")
             return EstimatedGeoPosition(valid=False)
 
         weights = self.get_weights(candidates)

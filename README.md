@@ -109,7 +109,7 @@ ros2 topic echo /fmu/in/aux_global_position
 #### Example outputs:
 ```text
 # Localization node
-[ predict ] finished in 0.61 seconds
+[predict] finished in 0.61 seconds
 [INFO] [1791047577.615547170] [visual_localization_node]: Est Lon: -84.40464278874128, Est Lat: 33.77676050536601, Est Error: 29.50274685137785
 
 # Test node
@@ -245,6 +245,10 @@ sudo systemctl daemon-reload              # Reload systemd
 sudo systemctl enable gps-denied.service  # Enable service on boot
 sudo systemctl start gps-denied.service   # Start it now
 systemctl status gps-denied.service       # Check status
+```
+To watch the logs, use:
+```bash
+journalctl -u gps-denied.service -f
 ```
 
 

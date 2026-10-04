@@ -8,7 +8,7 @@ def performance(func):
         start = time.perf_counter()
         result = func(*args, **kwargs)
         elapsed = time.perf_counter() - start
-        print(f"[ {func.__name__} ] finished in {elapsed:.2f} seconds")
+        print(f"[{func.__name__}] finished in {elapsed:.2f} seconds")
 
         return result
 
