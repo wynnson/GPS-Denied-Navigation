@@ -350,3 +350,7 @@ ip addr show wlan0                          # Check IP connection
   - Typical defaults:
     - **TELEM 1:** `57600`
     - **TELEM 2:** `921600`
+
+
+## License
+Licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
