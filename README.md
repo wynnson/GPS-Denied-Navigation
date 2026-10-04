@@ -250,7 +250,7 @@ To watch the logs, use:
 ```bash
 journalctl -u gps-denied.service -f
 ```
-To restart the service:
+To restart the service (like after a pull):
 ```bash
 sudo systemctl start gps-denied.service
 ```
