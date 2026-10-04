@@ -1,5 +1,20 @@
 # GPS Denied Navigation
 
+## Preprocessing
+Upload a tiff to data and adjust the raster file path.
+To create preprocessed DB, run:
+```bash
+python3 -m src.preprocessing.preprocess
+```
+
+## Converting to ONNX
+Run:
+```bash
+python3 ./scripts/export_model_onnx.py
+```
+If you want your own model or config, load it.
+
+
 ## Testing ROS2 Locally
 We will be using ROS2 Lyrical.
 
@@ -166,6 +181,16 @@ chmod +x scripts/install_micro_xrce_dds_agent.sh
 ./scripts/install_micro_xrce_dds_agent.sh
 ```
 
+Running the agent:
+```bash
+MicroXRCEAgent serial --dev /dev/ttyAMA0 -b 921600
+```
+This will create a LOT of topics that you can subscribe to. See them via:
+```bash
+ros2 topic list
+ros2 topic echo <topic>       # echo a certain topic 
+```
+
 #### Download Python Dependencies to Virtual Environment
 ```bash
 uv sync --no-dev
@@ -185,6 +210,13 @@ SER_TEL2_BAUD = 921600
 ```bash
 micro-xrce-dds-agent serial --dev /dev/<serial-device> -b 921600
 micro-xrce-dds-agent serial --dev /dev/ttyAMA0 -b 921600    # we use ttyAMA0 UART
+```
+
+#### Virtual Environment Setup
+```
+uv venv --system-site-packages            # IMPORTANT! to system ROS packages
+uv sync --no-dev                          # install needed python deps
+source .venv/bin/activate                 # activate venv
 ```
 
 ### Troubleshooting Raspberry Pi Issues

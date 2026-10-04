@@ -6,9 +6,6 @@
 *.faiss
 *.tif
 
-models/*.onnx
-models/*.onnx.data
-
 .env
 .venv
 __pycache__/

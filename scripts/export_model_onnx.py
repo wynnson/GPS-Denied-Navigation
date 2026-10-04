@@ -40,9 +40,9 @@ def export_model_onnx(config: DictConfig):
 
 
 def main(args=None):
-    config_path = Path("src/config/default.yaml")
-    config = load_config(config_path)
-    export_model_onnx(config)
+    model_config_path = Path("src/config/default.yaml")
+    model_config = load_config(model_config_path)
+    export_model_onnx(model_config)
 
 
 if __name__ == "__main__":
