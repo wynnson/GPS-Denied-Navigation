@@ -146,7 +146,7 @@ class Localizer:
 
         return float(horizontal_std)
 
-    def calculate_max_score(predictions: list[Prediction]) -> float:
+    def calculate_max_score(self,predictions: list[Prediction]) -> float:
         """Helper to calculate the max score when everything is filtered"""
         max_score = 0
         for prediction in predictions:
