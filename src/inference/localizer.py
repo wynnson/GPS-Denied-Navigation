@@ -14,7 +14,10 @@ from src.utils.distance import haversine_distance
 from src.database.tile_db_manager import TileDatabaseManager # CONTAINS FAISS
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(levelname)s] [%(name)s]: %(message)s",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -151,7 +154,7 @@ class Localizer:
         candidates = self.prune_acceptable_candidates(predictions)
 
         if len(candidates) == 0:
-            logger.info("Nothing matched, skipping estimate")
+            logger.info("Localization skipped: no candidates passed distance/score thresholds")
             return EstimatedGeoPosition(valid=False)
 
         weights = self.get_weights(candidates)
