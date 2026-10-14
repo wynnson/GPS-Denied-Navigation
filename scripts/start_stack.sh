@@ -25,7 +25,9 @@ cleanup() {
     echo "[STOP] Stack stopped."
 }
 
-trap cleanup EXIT SIGINT SIGTERM
+trap cleanup EXIT 
+trap 'exit 130' SIGINT
+trap 'exit 143' SIGTERM
 
 sleep 3 # buffer start
 

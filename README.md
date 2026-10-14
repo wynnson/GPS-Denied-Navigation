@@ -97,8 +97,8 @@ source .venv/bin/activate                 # activate venv
 
 6. Build `px4_msgs` package. More can be found [here](https://github.com/PX4/px4_msgs):
 ```bash
-chmod +x scripts/setup_px4_msgs.sh
-./scripts/setup_px4_msgs.sh
+chmod +x scripts/install_px4_msgs.sh
+./scripts/install_px4_msgs.sh
 ```
 
 7. Open another terminal and run visual localization node:
@@ -203,6 +203,14 @@ EOF
 git checkout
 ```
 
+#### Installing Everything
+Make sure you are connected to internet. This will take a long time. Run:
+```bash
+chmod +x scripts/install.sh
+./scripts/install.sh
+```
+If this succeeds, skip the ROS2 installation, PX4 Messages installation, and virtual environment manual setup. You should still read the guide tho :)
+
 #### ROS2 and RPI Installation on Raspberry Pi:
 This will also download other needed dependencies for the raspberry pi.
 ```bash
@@ -210,12 +218,12 @@ chmod +x scripts/install_rpi_deps.sh
 ./scripts/install_rpi_deps.sh
 ```
 
-#### Setup PX4 ROS2 Package
+#### Install PX4 Messages ROS2 Package
 `px4_msgs` is used to bridge ROS with Pixhawk. More about it can be found [here](https://github.com/PX4/px4_msgs). On the Raspberry Pi it will take a long time (30+ mins).
 
 ```bash
-chmod +x scripts/setup_px4_msgs.sh
-./scripts/setup_px4_msgs.sh       # IMPORTANT: Make sure to edit the firmware version you are on
+chmod +x scripts/install_px4_msgs.sh
+./scripts/install_px4_msgs.sh       # IMPORTANT: Make sure to edit the firmware version you are on
 ```
 
 #### Download Micro XRCE DDS Middleware
@@ -247,7 +255,7 @@ uv sync --no-dev
 1. Configure PX4 in QGroundControl (Skip to 3 if done):
 
 ```text
-MAV_1_CONFIG = Disabled
+MAV_1_CONFIG  = Disabled
 UXRCE_DDS_CFG = TELEM2
 SER_TEL2_BAUD = 921600
 ```
@@ -274,7 +282,7 @@ python3 -m src.ros.camera_node                            # REAL camera node
 python3 -m src.ros.tests.visual_localization_test --pi    # MOCK camera node
 ```
 
-#### Auto-boot Raspberry Pi:
+#### Auto-boot Setup Raspberry Pi:
 This will create a startup daemon managed by systemd. It will auto launch all processes when connected to power. Check out the `start_stack.sh` script for more details.
 ```bash
 # Make startup script executable
