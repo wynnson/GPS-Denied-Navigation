@@ -1,17 +1,36 @@
 # GPS Denied Navigation
-Navigate with just a preprocessed map on consumer hardware in GPS denied environments. 
-
-<img width="9528" height="6549" alt="archdiagram" src="https://github.com/user-attachments/assets/bdcc75a3-01d0-4732-952d-7ca623162d79" />
+Navigate with just a preprocessed map on consumer hardware in GPS denied environments. This project uses visual localization to estimate position from onboard camera imagery, with a deployment path for Raspberry Pi and PX4-based drones.
 
 
 ## Table of Contents
 
+- [Repository Layout](#repository-layout)
+- [Architecture Diagram](#architecture-diagram)
 - [Preprocessing](#preprocessing)
 - [ONNX Export](#converting-to-onnx)
 - [Local ROS 2 Testing](#testing-ros2-locally)
 - [Raspberry Pi 4B Setup](#raspberry-pi-4b)
 - [Raspberry Pi Troubleshooting](#troubleshooting-raspberry-pi-issues)
 
+## Repository Layout
+
+```text
+notebooks/              Prototype and visualization Jupyter notebooks
+src/preprocessing/      Raster tiling and map preprocessing
+src/inference/          Image-to-map localization
+src/models/             DINOv2 model wrappers
+src/ros/                ROS 2 camera and visual-localization nodes
+src/database/           Tile database and FAISS index management
+src/config/             Runtime and preprocessing configuration
+models/                 Exported ONNX model assets
+data/                   Map rasters, tile database, index, and test images
+scripts/                Model export and Raspberry Pi setup scripts
+systemd/                Raspberry Pi startup service
+pyproject.toml          Python dependencies
+```
+
+## Architecture Diagram
+<img width="9528" height="6549" alt="archdiagram" src="https://github.com/user-attachments/assets/bdcc75a3-01d0-4732-952d-7ca623162d79" />
 
 ## Preprocessing
 
